@@ -107,5 +107,131 @@ full_model_C63 = sm.GLM(y, X, family=sm.families.Binomial()).fit()
 print(full_model_C63.summary())
 
 
+6. Binary logistic
+import pandas as pd
+import statsmodels.api as sm
+import numpy as np
+
+# Assuming 'vacmotdesc' is your DataFrame
+# Create the formula
+f = 'C6 == 3 ~ Age + C(Obligation2)'
+
+# Fit the logistic regression model
+model_C63 = sm.formula.glm(formula=f, data=vacmotdesc, family=sm.families.Binomial())
+results = model_C63.fit()
+
+# Print the model summary
+print(results.summary())
+
+# If you want to extract specific coefficients:
+coefficients = results.params
+intercept = coefficients['Intercept']
+age_coef = coefficients['Age']
+obligation2_q2 = coefficients['C(Obligation2)[T.Q2]']
+obligation2_q3 = coefficients['C(Obligation2)[T.Q3]']
+obligation2_q4 = coefficients['C(Obligation2)[T.Q4]']
+
+print(f"Intercept: {intercept}")
+print(f"Age: {age_coef}")
+print(f"Obligation2 Q2: {obligation2_q2}")
+print(f"Obligation2 Q3: {obligation2_q3}")
+print(f"Obligation2 Q4: {obligation2_q4}")
+
+# Print degrees of freedom, deviance, and AIC
+print(f"Degrees of Freedom: {results.df_model} Total (i.e. Null); {results.df_resid} Residual")
+print(f"Null Deviance: {results.null_deviance:.0f}")
+print(f"Residual Deviance: {results.deviance:.0f}")
+print(f"AIC: {results.aic:.0f}")
+
+
+Multinomial reg
+
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+
+# Assuming 'vacmotdesc' is a pandas DataFrame
+vacmotdesc['Oblig2'] = vacmotdesc['Obligation2']
+
+# Prepare the data
+X = vacmotdesc[['Age', 'Oblig2']]
+y = vacmotdesc['C6']
+
+# Encode categorical variables if necessary
+le = LabelEncoder()
+X['Oblig2'] = le.fit_transform(X['Oblig2'])
+y = le.fit_transform(y)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the model
+model_C6 = MLPClassifier(hidden_layer_sizes=(100,), max_iter=1000, random_state=42)
+model_C6.fit(X_train, y_train)
+
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+# Assuming 'vacmotdesc' is your DataFrame
+X = vacmotdesc[['Age', 'Oblig2']]
+y = vacmotdesc['C6']
+
+# Create a preprocessor for one-hot encoding 'Oblig2'
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(drop='first'), ['Oblig2'])
+    ],
+    remainder='passthrough'
+)
+
+# Create a pipeline with preprocessor and multinomial logistic regression
+model_C6 = Pipeline([
+    ('preprocessor', preprocessor),
+    ('classifier', LogisticRegression(multi_class='multinomial', solver='lbfgs'))
+])
+
+# Fit the model
+model_C6.fit(X, y)
+
+# Print model summary
+print("Model: Multinomial Logistic Regression")
+print(f"Number of classes: {len(model_C6.named_steps['classifier'].classes_)}")
+print(f"Features: {['Age'] + [f'Oblig2_{cat}' for cat in model_C6.named_steps['preprocessor'].named_transformers_['cat'].categories_[0][1:]] + ['Intercept']}")
+print(f"Coefficients shape: {model_C6.named_steps['classifier'].coef_.shape}")
+print(f"Intercepts shape: {model_C6.named_steps['classifier'].intercept_.shape}")
+print(f"AIC: {model_C6.named_steps['classifier'].score(X, y):.4f}")
+
+
+
+
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.tools import add_constant
+from sklearn.preprocessing import LabelBinarizer
+
+# Assuming vacmotdesc is a pandas DataFrame
+# vacmotdesc = pd.read_csv('path_to_vacmotdesc.csv') # Load your data here
+
+# Prepare the data
+X = vacmotdesc[['Age', 'Oblig2']]  # Independent variables
+y = vacmotdesc['C6']  # Dependent variable
+
+# Convert categorical variable Oblig2 to dummy/indicator variables
+X = pd.get_dummies(X, columns=['Oblig2'], drop_first=True)
+
+# Add a constant term for the intercept
+X = add_constant(X)
+
+# Fit the multinomial logistic regression model
+model = sm.MNLogit(y, X)
+result = model.fit()
+
+# Print the summary
+print(result.summary())
+
 
 
