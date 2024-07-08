@@ -55,5 +55,57 @@ plt.ylabel("Moral obligation")
 plt.show()
 
 5.
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from statsmodels.graphics.effects_plot import plot_effects
+from scipy import stats
+
+# Assuming vacmotdesc is a pandas DataFrame
+
+# First linear model
+X = pd.get_dummies(vacmotdesc['C6'], drop_first=True, prefix='C6')
+y = vacmotdesc['Age']
+model1 = LinearRegression(fit_intercept=False)
+model1.fit(X, y)
+coeffs1 = pd.Series(model1.coef_, index=['C61', 'C62', 'C63', 'C64', 'C65', 'C66'])
+print(coeffs1)
+
+# Second linear model
+X = pd.get_dummies(vacmotdesc['C6'], drop_first=True, prefix='C6')
+X = sm.add_constant(X)
+y = vacmotdesc['Age']
+model2 = sm.OLS(y, X).fit()
+print(model2.summary())
+
+# Logistic regression model
+vacmotdesc['C6_3'] = (vacmotdesc['C6'] == 3).astype(int)
+X = pd.get_dummies(vacmotdesc['Obligation2'], drop_first=True, prefix='Obligation2')
+X['Age'] = vacmotdesc['Age']
+X = sm.add_constant(X)
+y = vacmotdesc['C6_3']
+model_C63 = sm.GLM(y, X, family=sm.families.Binomial()).fit()
+print(model_C63.summary())
+
+# Plot effects
+plot_effects(model_C63)
+plt.show()
+
+# Anova-like analysis
+from statsmodels.stats.anova import anova_lm
+anova_results = anova_lm(model_C63)
+print(anova_results)
+
+# Full model
+X = vacmotdesc.drop(['C6', 'C6_3'], axis=1)
+X = pd.get_dummies(X, drop_first=True)
+X = sm.add_constant(X)
+y = vacmotdesc['C6_3']
+full_model_C63 = sm.GLM(y, X, family=sm.families.Binomial()).fit()
+print(full_model_C63.summary())
+
+
 
 
