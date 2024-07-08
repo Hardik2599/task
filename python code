@@ -1,0 +1,59 @@
+import pandas as pd
+C6 = [123, 456, 235, 189, 174, 139, 94, 169]
+vacmotdesc['C6'] = pd.Categorical(C6)
+C6_Gender = pd.crosstab(vacmotdesc['C6'], vacmotdesc['Gender'])
+print(C6_Gender)
+
+2.
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.pyplot import figure
+
+data = vacmotdesc
+
+figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.hist(data['Age'], bins=10, by=data['Segment'])
+plt.title('Age by Segment')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+
+plt.subplot(1, 2, 2)
+plt.hist(data['Obligation'], bins=10, by=data['Segment'])
+plt.title('Obligation by Segment')
+plt.xlabel('Obligation')
+plt.ylabel('Frequency')
+
+plt.tight_layout()
+plt.show()
+
+
+3.
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='C6', y='Age', data=vacmotdesc)
+plt.xlabel("Segment number")
+plt.ylabel("Age")
+plt.show()
+	
+4.
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Assuming 'vacmotdesc' is your DataFrame
+# If not, you need to load your data into a pandas DataFrame first
+
+sns.boxplot(x='C6', y='Obligation', data=vacmotdesc, 
+            width=0.5, notch=True)
+
+plt.xlabel("Segment number")
+plt.ylabel("Moral obligation")
+plt.show()
+
+5.
+
+
